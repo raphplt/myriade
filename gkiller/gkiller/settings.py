@@ -1,4 +1,4 @@
-# Scrapy settings for tes project
+# Scrapy settings for gkiller project
 #
 # For simplicity, this file contains only settings considered important or
 # commonly used. You can find more settings consulting the documentation:
@@ -7,14 +7,14 @@
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-BOT_NAME = "tes"
+BOT_NAME = "gkiller"
 
-SPIDER_MODULES = ["tes.spiders"]
-NEWSPIDER_MODULE = "tes.spiders"
+SPIDER_MODULES = ["gkiller.spiders"]
+NEWSPIDER_MODULE = "gkiller.spiders"
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = "tes (+http://www.yourdomain.com)"
+#USER_AGENT = "gkiller (+http://www.yourdomain.com)"
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
@@ -45,13 +45,13 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 #SPIDER_MIDDLEWARES = {
-#    "tes.middlewares.TesSpiderMiddleware": 543,
+#    "gkiller.middlewares.GkillerSpiderMiddleware": 543,
 #}
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #DOWNLOADER_MIDDLEWARES = {
-#    "tes.middlewares.TesDownloaderMiddleware": 543,
+#    "gkiller.middlewares.GkillerDownloaderMiddleware": 543,
 #}
 
 # Enable or disable extensions
@@ -63,7 +63,7 @@ ROBOTSTXT_OBEY = True
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 #ITEM_PIPELINES = {
-#    "tes.pipelines.TesPipeline": 300,
+#    "gkiller.pipelines.GkillerPipeline": 300,
 #}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
