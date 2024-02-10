@@ -1,21 +1,26 @@
-from pathlib import Path
-
 import scrapy
-
+from . import collection  # 
 
 class QuotesSpider(scrapy.Spider):
     name = "quotes"
-
-    def start_requests(self):
-        urls = [
-            "https://quotes.toscrape.com/page/1/",
-            "https://quotes.toscrape.com/page/2/",
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+    start_urls = [
+        "https://quotes.toscrape.com/page/1/",
+        "https://quotes.toscrape.com/page/2/",
+        "https://fr.wikipedia.org/wiki/Jaime_Villegas"
+    ]
 
     def parse(self, response):
-        page = response.url.split("/")[-2]
-        filename = f"quotes-{page}.html"
-        Path(filename).write_bytes(response.body)
-        self.log(f"Saved file {filename}")
+        title = response.css('title::text').get()
+        description = response.css('meta[name="description"]::attr(content)').get()
+        content = response.css('body::text').getall()
+        links = response.css('a::attr(href)').getall()
+
+        data = {
+            'title': title,
+            'description': description,
+            'content': content,
+            'links': links,
+            'url': response.url
+        }
+
+        collection.insert_one(data)
