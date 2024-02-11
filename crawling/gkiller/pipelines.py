@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from scrapy.item import Item, Field
 
-from gkiller.spiders.main import AllInfoItem, URLItem
+from gkiller.items import AllInfoItem, URLItem
 
 from .settings import MONGODB_URI, MONGODB_DB, MONGODB_COLLECTION_ALL_INFO, MONGODB_COLLECTION_URLS
 

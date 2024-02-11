@@ -1,26 +1,21 @@
 import scrapy
-from scrapy.item import Item, Field
 from urllib.parse import urljoin
 from pymongo import MongoClient
+from gkiller.settings import MONGODB_COLLECTION_URLS, MONGODB_DB, MONGODB_URI
+from gkiller.items import AllInfoItem, URLItem
 
-class AllInfoItem(Item):
-    title = Field()
-    content = Field()
-    links = Field()
-    url = Field()
-
-class URLItem(Item):
-    url = Field()
-
-class QuotesSpider(scrapy.Spider):
+class MainSpider(scrapy.Spider):
     name = "main_spider"
-    start_urls = [
-        "https://fr.wikipedia.org/wiki/Jaime_Villegas"
-    ]
 
-    def __init__(self, *args, **kwargs):
-        super(QuotesSpider, self).__init__(*args, **kwargs)
-        self.start_urls = [kwargs.get('start_url')]
+    def start_requests(self):
+        client = MongoClient(MONGODB_URI)
+        db = client[MONGODB_DB]
+        collection = db[MONGODB_COLLECTION_URLS]
+        urls = collection.find({}, {'url': 1})
+
+        for url_doc in urls:
+            yield scrapy.Request(url_doc['url'], callback=self.parse)
+
 
     def parse(self, response):
         # Parsing for AllInfoItem
@@ -31,8 +26,6 @@ class QuotesSpider(scrapy.Spider):
 
         links = response.css('a::attr(href)').getall()
         
-        # base_url = response.url.split("/")[2]
-
         # Delete links starting with #
         links = [link for link in links if not link.startswith("#")]
 
