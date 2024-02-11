@@ -3,7 +3,6 @@ from urllib.parse import urljoin, urlparse
 from pymongo import MongoClient
 from gkiller.settings import MONGODB_COLLECTION_URLS, MONGODB_COLLECTION_ALL_INFO, MONGODB_DB, MONGODB_URI
 from gkiller.items import AllInfoItem, URLItem
-from scrapy.http import Request
 
 class MainSpider(scrapy.Spider):
     name = "main_spider"
@@ -35,7 +34,9 @@ class MainSpider(scrapy.Spider):
             all_info_item['title'] = response.css('title::text').get()
 
         if response.css('p::text'):
-            all_info_item['content'] = response.css('p::text').getall()
+            content = response.css('p::text').getall()
+            all_info_item['content'] = ' '.join(content) if content else ''
+
 
         all_info_item['url'] = response.url
 
@@ -47,6 +48,20 @@ class MainSpider(scrapy.Spider):
         links = [link for link in links if not link.startswith("mailto:")]
         links = [link for link in links if not link.startswith("javascript")]
         links = [link for link in links if not link.startswith("tel:")]
+        # links = [link for link in links if not link.startswith("whatsapp:")]
+        # links = [link for link in links if not link.startswith("sms:")]
+        # links = [link for link in links if not link.startswith("callto:")]
+        # links = [link for link in links if not link.startswith("skype:")]
+        # links = [link for link in links if not link.startswith("facetime:")]
+        # links = [link for link in links if not link.startswith("tg:")]
+        # links = [link for link in links if not link.startswith("viber:")]
+        # links = [link for link in links if not link.startswith("fb-messenger:")]
+        # links = [link for link in links if not link.startswith("line:")]
+        # links = [link for link in links if not link.startswith("weixin:")]
+        # links = [link for link in links if not link.startswith("qq:")]
+        # links = [link for link in links if not link.startswith("alipay:")]
+        # links = [link for link in links if not link.startswith("paypal:")]
+    
         
         # Make all links absolute
         links = [urljoin(response.url, link) for link in links]

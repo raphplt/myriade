@@ -14,9 +14,6 @@ class MongoDBPipeline(object):
         self.client.close()
 
     def process_item(self, item, spider):
-        # if isinstance(item, AllInfoItem):
-        #     print("Inserting document details")
-        #     self.db[MONGODB_COLLECTION_ALL_INFO].insert_one(dict(item))
         if isinstance(item, URLItem):
             print("Inserting URL")
             self.db[MONGODB_COLLECTION_URLS].insert_one(dict(item))
