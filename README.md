@@ -10,14 +10,31 @@
 
 ## Install
 
+### 1 - Install dependencies:
+
 ```sh
  pip install -r gkiller/requirements.txt
 ```
 
+### 2 - Set venv: 
+```sh
+python -m venv venv
+source venv/bin/activate // Linux and MacOS
+venv\Scripts\activate // Windows
+```
+
 ## Usage
 
+### 1 - Crawl first data
+
 ```sh
-scrapy crawl quotes
+python __init__.py
+```
+
+### 2 - Crawl the web
+
+```sh
+scrapy crawl main_spider
 ```
 
 ## Author

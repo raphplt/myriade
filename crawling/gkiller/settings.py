@@ -12,3 +12,4 @@ MONGODB_COLLECTION_URLS = 'urls' # MongoDB collection for URLs
 ITEM_PIPELINES = { # Item pipelines
     'gkiller.pipelines.MongoDBPipeline': 300,
 }
+USER_AGENT = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
