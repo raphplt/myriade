@@ -1,9 +1,8 @@
 from pymongo import MongoClient
-from scrapy.item import Item, Field
 
-from gkiller.items import AllInfoItem, URLItem
+from items import URLItem
 
-from .settings import MONGODB_URI, MONGODB_DB, MONGODB_COLLECTION_ALL_INFO, MONGODB_COLLECTION_URLS
+from settings import MONGODB_URI, MONGODB_DB, MONGODB_COLLECTION_URLS
 
 class MongoDBPipeline(object):
     def open_spider(self, spider):

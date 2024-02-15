@@ -13,7 +13,7 @@
 ### 1 - Install dependencies:
 
 ```sh
- pip install -r gkiller/requirements.txt
+ pip install -r crawler/requirements.txt
 ```
 
 ### 2 - Set venv: 

@@ -1,11 +1,16 @@
 import scrapy
 from urllib.parse import urljoin, urlparse
 from pymongo import MongoClient
-from gkiller.settings import MONGODB_COLLECTION_URLS, MONGODB_COLLECTION_ALL_INFO, MONGODB_DB, MONGODB_URI
-from gkiller.items import AllInfoItem, URLItem
+from settings import MONGODB_COLLECTION_ALL_INFO, MONGODB_COLLECTION_URLS, MONGODB_DB, MONGODB_URI
+from items import AllInfoItem, URLItem
 
 class MainSpider(scrapy.Spider):
     name = "main_spider"
+    
+    def remove_newlines_and_multiple_spaces(self, content):
+        content_without_newlines = content.replace('\n', '')
+        content_without_multiple_spaces = ' '.join(content_without_newlines.split())
+        return content_without_multiple_spaces
 
     def start_requests(self):
         client = MongoClient(MONGODB_URI)
@@ -35,8 +40,8 @@ class MainSpider(scrapy.Spider):
 
         if response.css('p::text'):
             content = response.css('p::text').getall()
-            all_info_item['content'] = ' '.join(content) if content else ''
-
+            cleaned_content = self.remove_newlines_and_multiple_spaces(' '.join(content)) if content else ''
+            all_info_item['content'] = cleaned_content
 
         all_info_item['url'] = response.url
 
@@ -48,20 +53,6 @@ class MainSpider(scrapy.Spider):
         links = [link for link in links if not link.startswith("mailto:")]
         links = [link for link in links if not link.startswith("javascript")]
         links = [link for link in links if not link.startswith("tel:")]
-        # links = [link for link in links if not link.startswith("whatsapp:")]
-        # links = [link for link in links if not link.startswith("sms:")]
-        # links = [link for link in links if not link.startswith("callto:")]
-        # links = [link for link in links if not link.startswith("skype:")]
-        # links = [link for link in links if not link.startswith("facetime:")]
-        # links = [link for link in links if not link.startswith("tg:")]
-        # links = [link for link in links if not link.startswith("viber:")]
-        # links = [link for link in links if not link.startswith("fb-messenger:")]
-        # links = [link for link in links if not link.startswith("line:")]
-        # links = [link for link in links if not link.startswith("weixin:")]
-        # links = [link for link in links if not link.startswith("qq:")]
-        # links = [link for link in links if not link.startswith("alipay:")]
-        # links = [link for link in links if not link.startswith("paypal:")]
-    
         
         # Make all links absolute
         links = [urljoin(response.url, link) for link in links]
