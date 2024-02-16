@@ -10,32 +10,44 @@
 
 ## Install
 
-### 1 - Install dependencies:
+### 1 - Optionnel (mais recommandé) : Créer un environnement virtuel
 
-```sh
- pip install -r crawler/requirements.txt
-```
-
-### 2 - Set venv: 
 ```sh
 python -m venv venv
 source venv/bin/activate // Linux and MacOS
 venv\Scripts\activate // Windows
 ```
 
+### 2 - Install dependencies:
+
+```sh
+ pip install -r crawler/requirements.txt
+```
+
+
 ## Usage
 
-### 1 - Crawl first data
+### 1 - Crawl datas
+  
+  ```sh
+  python crawler/run_spiders.py
+  ```
 
-```sh
-python __init__.py
-```
+  ### 2 - Run the server
 
-### 2 - Crawl the web
+  ```sh
+  cd api
+  pip install -r requirements.txt
+  uvicorn main:app --reload
+  ```
 
-```sh
-scrapy crawl main_spider
-```
+  ### 3 - Run the frontend
+
+  ```sh
+  cd app
+  npm install
+  npm run dev
+  ```
 
 ## Author
 
