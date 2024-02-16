@@ -42,8 +42,7 @@ async def get_document_details(url: str) -> Union[dict, None]:
     if document:
         return {
             "title": document.get("title", ""),
-            "content": document.get("content", ""),
-            "url": document.get("url", "")
+            "content": document.get("content", "")[:200],
         }
     else:
         return None

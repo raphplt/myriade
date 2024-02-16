@@ -1,8 +1,8 @@
-<div class="flex flex-col gap-5 items-center mx-auto w-full h-[100vh] mt-16">
+<main class="flex flex-col gap-5 items-center mx-auto w-full h-[100vh] mt-16">
   <img src={Myriade} alt="logo" class="inline-block" />
-  <form class="flex items-center justify-center gap-5" on:submit|preventDefault={handleSubmit}>
-    <input bind:value={searchQuery} type="text" placeholder="Rechercher..." class="w-96 h-12 px-4 border-2 border-gray-300 rounded-md" />
-    <button type="submit" class="w-12 h-12 bg-[#104817] text-white rounded-xl">
+  <form class="w-1/2 flex items-center justify-center gap-5" on:submit|preventDefault={handleSubmit}>
+    <input bind:value={searchQuery} type="text" required placeholder="Rechercher..." class="drop-shadow-sm focus:outline-none w-1/2 h-12 px-4 border-2 border-gray-300 rounded-md focus:border-[#34813f]" />
+    <button type="submit" class="w-12 h-12 bg-[#34813f] text-white rounded-xl">
       <Icon icon="akar-icons:search" class="w-6 h-6 inline-block" />
     </button>
   </form>
@@ -17,10 +17,12 @@
                 {#each result.documents as doc}
                   <div class="bg-gray-100 p-4 rounded-lg mb-3 drop-shadow-sm">
                     <a href={doc.url} target="_blank" >
-                      <h3 class="text-green-800"> {doc.details.title}</h3>
+                      <h3 class="text-green-800">{doc.details.title}</h3>
                       <span class="text-blue-800">{truncate(doc.url, 50)}</span>
+                     
                     </a>
                     <p>{truncate(doc.details.content, 95)}</p>
+                    <p class="italic text-gray-400 text-sm">Score : {(doc.tfidf_score).toFixed(4)}</p>
                   </div>
                 {/each}
               {:else}
@@ -35,10 +37,9 @@
       <p>Aucun résultat trouvé.</p>
     {/if}
   
-</div>
+</main>
 
 <script>
-  import logo from "../assets/logo.png";
   import Icon from '@iconify/svelte';
   import Myriade from "../assets/Myriade.svg"
   import { fetchData } from "./page";
