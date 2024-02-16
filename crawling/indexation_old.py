@@ -52,6 +52,3 @@ class Indexation():
             except Exception as e:
                 self.logger.error(f"Error indexing document {document['_id']}: {e}")
                 raise
-
-indexer = Indexation()
-indexer.index_documents()

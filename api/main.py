@@ -5,7 +5,11 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
 import json
 import uvicorn
+from sklearn.feature_extraction.text import TfidfVectorizer
+import logging
+import time
 
+logging.basicConfig(level=logging.DEBUG)
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -15,10 +19,9 @@ class JSONEncoder(json.JSONEncoder):
 
 app = FastAPI()
 
-# Ajouter le middleware CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Vous pouvez spécifier les origines autorisées ici
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
@@ -31,32 +34,41 @@ collection_details = db["documents_details"]
 
 async def search_index(query: str) -> List[dict]:
     cursor = collection_index.find({"word": query})
-    
     results = [document async for document in cursor]
-    
     return results
 
 async def get_document_details(url: str) -> Union[dict, None]:
-    document = await collection_details.find_one({ "url": url})
+    document = await collection_details.find_one({"url": url})
     if document:
         return {
             "title": document.get("title", ""),
-            "content": document.get("content", "")[:100],
+            "content": document.get("content", ""),
             "url": document.get("url", "")
         }
     else:
         return None
 
+async def calculate_tfidf_scores(query: str, urls: List[str]) -> dict:
 
-@app.get("/search/")
-async def search(query: str = None):
-    if query is None:
-        return {"error": "Aucune requête de recherche spécifiée."}
-    
+    documents = [await collection_details.find_one({"url": url}) for url in urls]
+    document_texts = [doc["content"] for doc in documents if doc and "content" in doc]
+    tfidf_vectorizer = TfidfVectorizer()
+    tfidf_matrix = tfidf_vectorizer.fit_transform(document_texts)
+    # terms = tfidf_vectorizer.get_feature_names_out()
+    term_index = tfidf_vectorizer.vocabulary_.get(query)
+    if term_index is None:
+        return {}
+    tfidf_scores = {url: score for url, score in zip(urls, tfidf_matrix[:, term_index].toarray().flatten())}
+
+    return tfidf_scores
+
+async def search_with_tfidf(query: str, tfidf_scores: dict) -> List[dict]:
+
     search_results = await search_index(query)
     detailed_results = []
     
     for result in search_results:
+        word = result["word"]
         documents = result["documents"]
         detailed_documents = []
         
@@ -64,18 +76,54 @@ async def search(query: str = None):
             for url in doc:
                 details = await get_document_details(url)
                 if details:
+                    tfidf_score = tfidf_scores.get(url, 0)
                     detailed_documents.append({
                         "url": url,
-                        "details": details
+                        "details": details,
+                        "tfidf_score": tfidf_score
                     })
+        
+        detailed_documents.sort(key=lambda x: x["tfidf_score"], reverse=True)
         
         if detailed_documents:  
             detailed_results.append({
-                "word": result["word"],
+                "word": word,
                 "documents": detailed_documents
             })
     
-    return {"results": detailed_results}
+    logging.info(f"Search with TF-IDF done for query: {query}")
+    return detailed_results
+
+@app.get("/search/")
+async def search_api(query: str = None):
+    if query is None:
+        return {"error": "Aucune requête de recherche spécifiée."}
+    
+    start_time = time.time()
+    
+    search_results = await search_index(query)
+    
+    relevant_urls = []
+    
+    if not search_results:
+        return {"results": []}
+    
+    for result in search_results:
+        documents = result["documents"]
+        for doc in documents:
+            relevant_urls.extend(doc.keys())
+    relevant_urls = list(set(relevant_urls))
+    
+    tfidf_scores = await calculate_tfidf_scores(query, relevant_urls)
+    search_results = await search_with_tfidf(query, tfidf_scores)
+    
+    end_time = time.time()
+    duration = end_time - start_time
+    
+    for result in search_results:
+        result["time"] = duration
+    
+    return {"results": search_results}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

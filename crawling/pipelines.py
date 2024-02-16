@@ -1,6 +1,7 @@
+from concurrent.futures import ThreadPoolExecutor
 from pymongo import MongoClient
-
-from items import URLItem
+from index_document import Indexation
+from items import AllInfoItem, URLItem
 
 from settings import MONGODB_URI, MONGODB_DB, MONGODB_COLLECTION_URLS
 
@@ -14,8 +15,16 @@ class MongoDBPipeline(object):
 
     def process_item(self, item, spider):
         if isinstance(item, URLItem):
-            print("Inserting URL")
+            print("Inserting URL", item["url"])
             self.db[MONGODB_COLLECTION_URLS].insert_one(dict(item))
         else:
             print("Unknown item type:", type(item))
+        if isinstance(item, AllInfoItem):
+            self.index_document(item)
+            print("Document indexed:", item["url"])
+        
         return item
+
+    def index_document(self, item):
+        with ThreadPoolExecutor() as executor:
+            executor.submit(Indexation().index_document, item)
