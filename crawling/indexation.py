@@ -23,6 +23,11 @@ class Indexation():
                 document_title = document['title']
                 document_content = document.get('content', '')
 
+                # Vérifier si le document est déjà indexé
+                if self.index.find_one({'documents.url': document_url}):
+                    self.logger.info(f"Document already indexed: {document_url}")
+                    continue
+
                 unique_words = set(document_title.split() + document_content.split())
 
                 for word in unique_words:

@@ -8,7 +8,7 @@
   </form>
     {#if searchResults && searchResults.length > 0}
       <div class="mt-5 w-1/3">
-        <h2 class="text-lg font-bold mb-1">Résultats de la recherche :</h2>
+        <h2 class="text-lg font-bold">Résultats de la recherche :</h2>
         <ul>
           {#each searchResults as result}
           <div>
