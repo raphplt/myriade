@@ -1,5 +1,5 @@
 from typing import List, Union
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from bson import ObjectId
@@ -94,35 +94,44 @@ async def search_with_tfidf(query: str, tfidf_scores: dict) -> List[dict]:
     return detailed_results
 
 @app.get("/search/")
-async def search_api(query: str = None):
+async def search_api(query: str = Query(...)):
     if query is None:
         return {"error": "Aucune requête de recherche spécifiée."}
     
     start_time = time.time()
     
-    search_results = await search_index(query)
+    keywords = query.split()
     
-    relevant_urls = []
+    combined_results = []
+    for keyword in keywords:
+        search_results = await search_index(keyword)
+        relevant_urls = []
+        for result in search_results:
+            documents = result["documents"]
+            for doc in documents:
+                relevant_urls.extend(doc.keys())
+        relevant_urls = list(set(relevant_urls))
+        tfidf_scores = await calculate_tfidf_scores(keyword, relevant_urls)
+        search_results = await search_with_tfidf(keyword, tfidf_scores)
+        combined_results.extend(search_results)
     
-    if not search_results:
-        return {"results": []}
+    combined_results_dict = {}
+    for result in combined_results:
+        word = result["word"]
+        if word not in combined_results_dict:
+            combined_results_dict[word] = {"documents": []}
+        combined_results_dict[word]["documents"].extend(result["documents"])
     
-    for result in search_results:
-        documents = result["documents"]
-        for doc in documents:
-            relevant_urls.extend(doc.keys())
-    relevant_urls = list(set(relevant_urls))
-    
-    tfidf_scores = await calculate_tfidf_scores(query, relevant_urls)
-    search_results = await search_with_tfidf(query, tfidf_scores)
+    for word, data in combined_results_dict.items():
+        data["documents"].sort(key=lambda x: x["tfidf_score"], reverse=True)
     
     end_time = time.time()
     duration = end_time - start_time
     
-    for result in search_results:
+    for result in combined_results_dict.values():
         result["time"] = duration
     
-    return {"results": search_results}
+    return {"results": list(combined_results_dict.values())}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
