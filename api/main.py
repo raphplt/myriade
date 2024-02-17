@@ -1,3 +1,4 @@
+
 from typing import List, Union
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -101,37 +102,33 @@ async def search_api(query: str = Query(...)):
     start_time = time.time()
     
     keywords = query.split()
-    
     combined_results = []
+    
     for keyword in keywords:
         search_results = await search_index(keyword)
         relevant_urls = []
+        
         for result in search_results:
             documents = result["documents"]
             for doc in documents:
                 relevant_urls.extend(doc.keys())
+        
         relevant_urls = list(set(relevant_urls))
         tfidf_scores = await calculate_tfidf_scores(keyword, relevant_urls)
         search_results = await search_with_tfidf(keyword, tfidf_scores)
-        combined_results.extend(search_results)
+        combined_results.extend([item["documents"] for item in search_results])
     
-    combined_results_dict = {}
-    for result in combined_results:
-        word = result["word"]
-        if word not in combined_results_dict:
-            combined_results_dict[word] = {"documents": []}
-        combined_results_dict[word]["documents"].extend(result["documents"])
+    combined_results = [item for sublist in combined_results for item in sublist]
     
-    for word, data in combined_results_dict.items():
-        data["documents"].sort(key=lambda x: x["tfidf_score"], reverse=True)
+    combined_results.sort(key=lambda x: x["tfidf_score"], reverse=True)
     
     end_time = time.time()
     duration = end_time - start_time
     
-    for result in combined_results_dict.values():
-        result["time"] = duration
+    response = {"results": combined_results, "time": duration}
     
-    return {"results": list(combined_results_dict.values())}
+    return response
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
