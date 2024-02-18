@@ -72,9 +72,7 @@ async def calculate_tfidf_scores(query: str, urls: List[str]) -> dict:
 
     return tfidf_scores
 
-async def search_with_tfidf(query: str, tfidf_scores: dict) -> List[dict]:
-
-    search_results = await search_index(query)
+async def search_with_tfidf(search_results: List[dict], tfidf_scores: dict) -> List[dict]:
     detailed_results = []
     
     for result in search_results:
@@ -101,7 +99,6 @@ async def search_with_tfidf(query: str, tfidf_scores: dict) -> List[dict]:
                 "documents": detailed_documents
             })
     
-    logging.info(f"Search with TF-IDF done for query: {query}")
     return detailed_results
 
 @app.get("/search/")
@@ -116,11 +113,13 @@ async def search_api(query: str = Query(...)):
         
         keywords = normalized_query.split()
         combined_results = []
+        search_results = []
         
         for keyword in keywords:
-            search_results = await search_index(keyword)
+            search_results.extend(await search_index(keyword))
+        
+        for keyword in keywords:
             relevant_urls = []
-            
             for result in search_results:
                 documents = result["documents"]
                 for doc in documents:
@@ -128,7 +127,7 @@ async def search_api(query: str = Query(...)):
             
             relevant_urls = list(set(relevant_urls))
             tfidf_scores = await calculate_tfidf_scores(keyword, relevant_urls)
-            search_results = await search_with_tfidf(keyword, tfidf_scores)
+            search_results = await search_with_tfidf(search_results, tfidf_scores)
             combined_results.extend([item["documents"] for item in search_results])
         
         combined_results = [item for sublist in combined_results for item in sublist]
@@ -136,6 +135,8 @@ async def search_api(query: str = Query(...)):
         
         end_time = time.time()
         duration = end_time - start_time
+        
+        print("Done in", round(duration, 4), "seconds")
         
         response = {"results": combined_results, "time": duration}
         
