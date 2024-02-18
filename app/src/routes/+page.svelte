@@ -9,25 +9,20 @@
     {#if searchResults && searchResults.length > 0}
       <div class="mt-5 w-1/3">
         <h2 class="text-lg font-bold">Résultats de la recherche :</h2> 
+        <p class="text-sm text-gray-500 mb-5"> {searchResults.length} {searchResults.length > 1 ? "résultats trouvés." : "résultat trouvé."} Temps de calcul : {(time).toFixed(2)} secondes</p>
         <ul>
           {#each searchResults as result}
             <div>
-              {#if result.documents}
-                <p class="text-sm text-gray-500 mb-5"> {result.documents.length} {result.documents.length > 1 ? "résultats trouvés." : "résultat trouvé."} Temps de calcul : {(result.time).toFixed(2)} secondes</p>
-                {#each result.documents as doc}
                   <div class="bg-gray-100 p-4 rounded-lg mb-3 drop-shadow-sm">
-                    <a href={doc.url} target="_blank" >
-                      <h3 class="text-green-800">{doc.details.title}</h3>
-                      <span class="text-blue-800">{truncate(doc.url, 50)}</span>
+                    <a href={result.url} target="_blank" >
+                      <h3 class="text-green-800">{result.details.title}</h3>
+                      <span class="text-blue-800">{truncate(result.url, 50)}</span>
                      
                     </a>
-                    <p>{truncate(doc.details.content, 95)}</p>
-                    <p class="italic text-gray-400 text-sm">Score : {(doc.tfidf_score).toFixed(4)}</p>
+                    <p>{truncate(result.details.content, 95)}</p>
+                    <p class="italic text-gray-400 text-sm">Score : {(result.tfidf_score).toFixed(4)}</p>
                   </div>
-                {/each}
-              {:else}
-                <p>Aucun résultat trouvé pour ce mot-clé.</p>
-              {/if}
+
             </div>
           {/each}
 
@@ -49,14 +44,16 @@
    * @type {string | any[] | null}
    */
   let searchResults = null;
+  let time = 0;
 
 
   async function handleSubmit() {
     try {
       const data = await fetchData(searchQuery);
       searchResults = data.results;
+      time = data.time;
     } catch (error) {
-      console.error(error);
+      console.error("ERROR", error);
     }
   }
 
