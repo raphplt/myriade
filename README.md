@@ -8,6 +8,9 @@
 
 > Le projet vise à créer un moteur de recherche du futur en combinant l'indexation classique des moteurs de recherche avec l'intelligence artificielle générative dans une interface unifiée et open-source, offrant une expérience utilisateur améliorée tout en préservant la confidentialité des données.
 
+### 🏠 [Homepage]
+<img src="public/first_preview.png" alt="preview" width="100%"/>
+
 ## Install
 
 ### 1 - Optionnel (mais recommandé) : Créer un environnement virtuel
