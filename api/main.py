@@ -114,6 +114,7 @@ async def search_api(query: str = Query(...)):
         keywords = normalized_query.split()
         combined_results = []
         search_results = []
+        unique_urls = set()  # Ensemble pour stocker les URL uniques
         
         for keyword in keywords:
             search_results.extend(await search_index(keyword))
@@ -130,7 +131,15 @@ async def search_api(query: str = Query(...)):
             search_results = await search_with_tfidf(search_results, tfidf_scores)
             combined_results.extend([item["documents"] for item in search_results])
         
-        combined_results = [item for sublist in combined_results for item in sublist]
+        for sublist in combined_results:
+            for item in sublist:
+                if item["url"] not in unique_urls: 
+                    unique_urls.add(item["url"])
+                else:
+                    sublist.remove(item) 
+        
+        combined_results = [item for sublist in combined_results for item in sublist if item["tfidf_score"] > 0] 
+        
         combined_results.sort(key=lambda x: x["tfidf_score"], reverse=True)
         
         end_time = time.time()
@@ -145,6 +154,7 @@ async def search_api(query: str = Query(...)):
     except Exception as e:
         logging.error(f"An error occurred: {e}")
         return {"error": "Une erreur s'est produite lors du traitement de la requête."}
+
 
 
 if __name__ == "__main__":
