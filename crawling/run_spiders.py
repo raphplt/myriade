@@ -34,9 +34,7 @@ def run_spiders():
 
 def main():
     
-    
     # while True:
-        
         
     create_urls_collection()
     urls = [

@@ -1,8 +1,9 @@
 import logging
-from settings import MONGODB_COLLECTION_INDEX, MONGODB_COLLECTION_ALL_INFO, MONGODB_DB, MONGODB_URI 
+from settings import MONGODB_COLLECTION_INDEX, MONGODB_DB, MONGODB_URI 
 from pymongo import MongoClient
 
 class Indexation():
+    
     def __init__(self):
         self.client = MongoClient(MONGODB_URI)
         self.db = self.client[MONGODB_DB]
@@ -13,7 +14,7 @@ class Indexation():
         ch = logging.StreamHandler()
         ch.setFormatter(formatter)
         self.logger.addHandler(ch)
-
+        
     def index_document(self, document):
         try:
             document_url = document['url']
@@ -28,7 +29,7 @@ class Indexation():
             unique_words = set(document_title.split() + document_content.split())
 
             for word in unique_words:
-                word = word.lower()
+                word = word.lower().strip(".,;:!?()[]{}-_")
                 existing_entry = self.index.find_one({'word': word})
                 if existing_entry:
                     document_entry = next((entry for entry in existing_entry['documents'] if document_url in entry), None)
