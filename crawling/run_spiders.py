@@ -1,7 +1,6 @@
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
 from pymongo import MongoClient
-import time
 
 from settings import MONGODB_COLLECTION_URLS, MONGODB_DB, MONGODB_URI, CONCURRENT_REQUESTS, CONCURRENT_REQUESTS_PER_DOMAIN
 from spiders.main import MainSpider

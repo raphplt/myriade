@@ -17,8 +17,7 @@ class MongoDBPipeline(object):
         if isinstance(item, URLItem):
             print("Inserting URL", item["url"])
             self.db[MONGODB_COLLECTION_URLS].insert_one(dict(item))
-        else:
-            print("Unknown item type:", type(item))
+
         if isinstance(item, AllInfoItem):
             self.index_document(item)
             print("Document indexed:", item["url"])

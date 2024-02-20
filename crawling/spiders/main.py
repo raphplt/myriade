@@ -82,7 +82,7 @@ class MainSpider(scrapy.Spider):
         self.mark_url_as_done(url_doc_id)
 
         # Parsing for URLItem
-        for link in all_info_item['links']:
+        for link in all_info_item['links'] or []:
             if self.is_valid_url(link):
                 url_item = URLItem()
                 url_item['url'] = link
